@@ -2,62 +2,63 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 class DoughMachineOperations {
 
-    DoughMachine doughMachine;
+    private DoughMachine doughMachine;
 
     DoughMachineOperations() {
-        String takeAmountOfFlour = "SELECT AMOUNT FROM INGREDIENTS WHERE PRODUCT = 'FLOUR'";
-        String takeAmountOfMilk = "SELECT AMOUNT FROM INGREDIENTS WHERE PRODUCT = 'MILK'";
-        String takeAmountOfYeast = "SELECT AMOUNT FROM INGREDIENTS WHERE PRODUCT = 'YEAST'";
-        String takeAmountOfEggs = "SELECT AMOUNT FROM INGREDIENTS WHERE PRODUCT = 'EGGS'";
-
+        String takeIngredients = "SELECT * FROM INGREDIENTS";
         try (
                 Connection connection = DriverManager.getConnection(DatabaseAccess.databaseAddress,
                         DatabaseAccess.username, DatabaseAccess.password);
-                Statement statementForFlour = connection.createStatement();
-                Statement statementForMilk = connection.createStatement();
-                Statement statementForYeast = connection.createStatement();
-                Statement statementForEggs = connection.createStatement();
-                ResultSet resultSetForFlour = statementForFlour.executeQuery(takeAmountOfFlour);
-                ResultSet resultSetForMilk = statementForMilk.executeQuery(takeAmountOfMilk);
-                ResultSet resultSetForYeast = statementForYeast.executeQuery(takeAmountOfYeast);
-                ResultSet resultSetForEggs = statementForEggs.executeQuery(takeAmountOfEggs)
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(takeIngredients);
         ) {
-            resultSetForFlour.next();
-            resultSetForMilk.next();
-            resultSetForYeast.next();
-            resultSetForEggs.next();
-
+            Map<String, Integer> amounts = new HashMap<>();
+            while(resultSet.next()) {
+                amounts.put(resultSet.getString("PRODUCT"), resultSet.getInt("AMOUNT"));
+            }
             this.doughMachine = new DoughMachine(
-                    (Integer.parseInt(resultSetForFlour.getString("AMOUNT"))),
-                    (Integer.parseInt(resultSetForMilk.getString("AMOUNT"))),
-                    (Integer.parseInt(resultSetForYeast.getString("AMOUNT"))),
-                    (Integer.parseInt(resultSetForEggs.getString("AMOUNT")))
+                    amounts.get("FLOUR"), amounts.get("MILK"), amounts.get("YEAST"), amounts.get("EGGS")
             );
-
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    void runMachine() {
-        doughMachine.showIngredients();
-        System.out.println("Type \"run\" for prepare a dough or anything else for exit:");
+    private void menuMessage() {
+        System.out.println("""
+               "run" -> Prepare a Dough
+               type anything else for exit
+                """);
+    }
+
+    private String takeUserInput() {
         Scanner scanner = new Scanner(System.in);
-        String command = scanner.next();
-        while(command.equals("run")) {
-            if(doughMachine.checkIngredients()) {
-                doughMachine.prepareDough();
-                doughMachine.reduceIngredients();
-                doughMachine.showIngredients();
-                System.out.println("Type \"run\" for prepare a dough or anything else for exit:");
-                command = scanner.next();
-            } else {
-                break;
-            }
+        return scanner.next();
+    }
+
+    private boolean responseForUserInput(String input) {
+        if(input.equals("run")) {
+            doughMachine.prepareDough();
+            doughMachine.reduceIngredients();
+            doughMachine.showIngredients();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    void runDoughMachine() {
+        menuMessage();
+        String input = takeUserInput();
+        while(doughMachine.checkIngredients() && responseForUserInput(input)) {
+            menuMessage();
+            input = takeUserInput();
         }
     }
 }
