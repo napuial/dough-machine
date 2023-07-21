@@ -2,19 +2,8 @@
 postgresql-15.2-2-windows-x64.exe <br>
 postgresql-42.6.0.jar
 
-CREATE TABLE INGREDIENTS( </br>
-&emsp; PRODUCT &emsp; VARCHAR(20) &ensp; NOT NULL, </br>
-&emsp; AMOUNT &emsp;&nbsp; SMALLINT &emsp;&emsp; NOT NULL </br>
-);
+<img src="prepare-database.gif" alt="prepare-database.gif" height="350"/></br>
 
-INSERT INTO INGREDIENTS (PRODUCT, AMOUNT) </br>
-VALUES ('FLOUR', 5000); <br>
-
-INSERT INTO INGREDIENTS (PRODUCT, AMOUNT) </br>
-VALUES ('MILK', 5000); <br>
-
-INSERT INTO INGREDIENTS (PRODUCT, AMOUNT) </br>
-VALUES ('YEAST', 1000); <br>
-
-INSERT INTO INGREDIENTS (PRODUCT, AMOUNT) </br>
-VALUES ('EGGS', 200);
+Dough Machine app is working with the PostgreSQL database.</br>
+User can prepare a dough when all needed ingredients have enough amount.</br>
+If amount of any ingredient is not enough a user gets information about it.
